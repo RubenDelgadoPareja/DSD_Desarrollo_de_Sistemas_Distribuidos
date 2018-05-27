@@ -1,0 +1,207 @@
+<!-- José María Gómez García -->
+
+<html>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Agente</title>
+	</head>
+
+	<body style="margin: 5%;">
+
+		<h1>Agente</h1>
+
+		<div style="margin-top: 50px;">
+
+			<h2>Valores actuales:</h2>
+
+			<p>Temperatura actual: <span id="temperatura"></span></p>
+
+			<p>Luminosidad actual: <span id="luminosidad"></span></p>
+
+			<p>Nº de alimentos en nevera: <span id="alimentosnevera"></span></p>
+
+			<h2>Umbrales temperatura:</h2>
+
+			<p style="color: crimson;">Temperatura máxima: <span id="temperaturamax"></span></p>
+
+			<p style="color: darkcyan;">Temperatura mínima: <span id="temperaturamin"></span></p>
+
+			<h2>Umbrales luminosidad:</h2>
+
+			<p style="color: crimson;">Luminosidad máxima: <span id="luminosidadmax"></span></p>
+
+			<p style="color: darkcyan;">Luminosidad mínima: <span id="luminosidadmin"></span></p>
+
+<!-- EXÁMEN //////////////////////////// -->
+
+			<h2>Umbrales nevera:</h2>
+
+			<p style="color: darkcyan;">Nevera bajo consumo (temperatura máxima): <span id="neverabctempmax"></span></p>
+
+			<p style="color: darkcyan;">Nevera bajo consumo (alimentos máximos): <span id="neverabcalimmax"></span></p>
+
+<!-- ///////////////////////////////// -->
+
+		</div>
+
+	</body>
+
+
+	<script src="http://localhost:8080/socket.io/socket.io.js"></script>
+	<script type="text/javascript">
+
+		var serviceURL = 'localhost:8080';
+		var socket = io.connect(serviceURL);
+
+		var umbralMax_temperatura = 25;
+		var umbralMin_temperatura = 18;
+
+		var umbralMax_luminosidad = 50;
+		var umbralMin_luminosidad = 20;
+
+// EXÁMEN ///////////////////////////////////////
+
+		var umbralMaxTemp_nevera = 20;
+		var umbralMaxAlim_nevera = 7;
+
+//////////////////////////////////////////////////
+
+		var temperatura_actual = 0.0;
+		var luminosidad_actual = 0.0;
+
+// EXÁMEN /////////////////////////////////////////
+
+		var alimentosnevera_actual = 0.0;
+
+/////////////////////////////////////////////////
+
+		document.getElementById('temperaturamax').innerHTML = umbralMax_luminosidad;
+		document.getElementById('temperaturamin').innerHTML = umbralMin_luminosidad;
+
+		document.getElementById('luminosidadmax').innerHTML = umbralMax_luminosidad;
+		document.getElementById('luminosidadmin').innerHTML = umbralMin_luminosidad;
+
+// EXÁMEN ////////////////////////////////////////
+
+		document.getElementById('neverabctempmax').innerHTML = umbralMaxTemp_nevera;
+		document.getElementById('neverabcalimmax').innerHTML = umbralMaxAlim_nevera;
+
+///////////////////////////////////////////////////
+
+		socket.on('actualizar-temperatura', function(data) {
+
+			var alerta;
+			var date;
+
+			temperatura_actual = data;
+
+			var temp = document.getElementById('temperatura');
+			temp.innerHTML = temperatura_actual;
+
+			if (temperatura_actual > umbralMax_temperatura) {
+
+				alerta = "Temperatura por encima del máximo.";
+				date = new Date();
+
+				socket.emit('alerta-temperatura', {aler:alerta, d:date});
+
+				if (luminosidad_actual > umbralMax_luminosidad) {
+
+					socket.emit('cerrar-persiana');
+				}
+			}
+			else if (temperatura_actual < umbralMin_temperatura) {
+
+				alerta = "Temperatura por debajo del mínimo.";
+				date = new Date();
+
+				socket.emit('alerta-temperatura', {aler:alerta, d:date});
+			}
+			else {
+				
+				socket.emit('temperatura-en-rango');
+			}
+
+			if (alimentosnevera_actual < umbralMaxAlim_nevera && temperatura_actual < umbralMaxTemp_nevera) {
+
+				alerta = "Nº de alimentos y Temperatura para bajo consumo."
+				date = new Date();
+
+				socket.emit('alerta-alimentosnevera', {aler:alerta, d:date});
+				socket.emit('nevera-bajoconsumo');
+			}
+			else {
+
+				socket.emit('alimentosnevera-en-rango');
+				socket.emit('nevera-normal');
+			}	
+		});
+
+		socket.on('actualizar-luminosidad', function(data) {
+
+			var alerta;
+			var date;
+
+			luminosidad_actual = data;
+
+			var lumi = document.getElementById('luminosidad');
+			lumi.innerHTML = luminosidad_actual;
+
+			if (luminosidad_actual > umbralMax_luminosidad) {
+
+				alerta = "Luminosidad por encima del máximo.";
+				date = new Date();
+
+				socket.emit('alerta-luminosidad', {aler:alerta, d:date});
+
+				if (temperatura_actual > umbralMax_temperatura) {
+
+					socket.emit('cerrar-persiana');
+				}
+			}
+			else if (luminosidad_actual < umbralMin_luminosidad) {
+
+				alerta = "Luminosidad por debajo del mínimo.";
+				date = new Date();
+
+				socket.emit('alerta-luminosidad', {aler:alerta, d:date});
+			}
+			else {
+
+				socket.emit('luminosidad-en-rango');
+			}
+		});
+
+// EXÁMEN ///////////////////////////////////////////////////////
+
+		socket.on('actualizar-alimentosnevera', function(data) {
+
+			var alerta;
+			var date;
+
+			alimentosnevera_actual = data;
+
+			var alimnevera = document.getElementById('alimentosnevera');
+			alimnevera.innerHTML = alimentosnevera_actual;
+
+			if (alimentosnevera_actual < umbralMaxAlim_nevera && temperatura_actual < umbralMaxTemp_nevera) {
+
+				alerta = "Nº de alimentos y Temperatura para bajo consumo."
+				date = new Date();
+
+				socket.emit('alerta-alimentosnevera', {aler:alerta, d:date});
+				socket.emit('nevera-bajoconsumo');
+			}
+			else {
+
+				socket.emit('alimentosnevera-en-rango');
+				socket.emit('nevera-normal');
+			}
+		});
+
+///////////////////////////////////////////////////////////////
+
+	</script>
+
+</html>

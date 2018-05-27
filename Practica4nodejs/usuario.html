@@ -1,0 +1,233 @@
+<!-- José María Gómez García -->
+
+<html>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Usuario</title>
+	</head>
+	
+	<body style="margin: 5%;">
+
+		<h1>Usuario</h1>
+
+		<div style="margin-top: 50px;">
+
+			<p>Temperatura: <span id="temperatura"></span></p>
+
+			<p style="color: red;"><span id="alertatemp"></span> &nbsp; <span id="alertatempd"></span></p>
+
+			<p>Luminosidad: <span id="luminosidad"></span></p>
+
+			<p style="color: red;"><span id="alertalumi"></span> &nbsp; <span id="alertalumid"></span></p>
+
+<!-- EXÁMEN //////////////////////// -->
+
+			<p>Nº de alimentos en nevera: <span id="alimentosnevera"></span></p>
+
+			<p style="color: red;"><span id="alertaalimnevera"></span> &nbsp; <span id="alertaalimneverad"></span></p>
+
+<!-- ////////////////////////////// -->
+
+		</div>
+
+		<div style="margin-top: 50px;">
+
+			<p>Persiana: <span id="persiana"></span></p>
+
+			<p>A/C: <span id="ac"></span></p>
+
+<!-- EXÁMEN ////////////////////// -->
+
+			<p>Nevera: <span id="nevera"></span></p>
+
+<!-- //////////////////////////// -->
+
+		</div>
+
+		<div style="margin-top: 50px;">
+
+			<button type="button" onclick="javascript:botonPersiana();" style="width: 200px;height: 50px;background: gainsboro;">Persiana <span style="color: green;">ABRIR</span>/<span style="color: red;">CERRAR</span></button>
+
+			</br>
+
+			<button type="button" onclick="javascript:botonAC();" style="width: 200px;height: 50px;margin-top: 10px;background: gainsboro;">A/C <span style="color: green;">ON</span>/<span style="color: red;">OFF</span></button>
+
+<!-- EXÁMEN //////////////////////// -->
+
+			</br>
+
+			<button type="button" onclick="javascript:botonNevera();" style="width: 200px;height: 50px;margin-top: 10px;background: gainsboro;">NEVERA <span style="color: green;">BAJO CONSUMO</span>/<span style="color: red;">NORMAL</span></button>
+
+<!-- /////////////////////////////// -->
+
+		</div>
+
+	</body>
+
+	<script src="http://localhost:8080/socket.io/socket.io.js"></script>
+	<script type="text/javascript">
+
+		var serviceURL = 'localhost:8080';
+		var socket = io.connect(serviceURL);
+
+		function botonPersiana() {
+
+			socket.emit('boton-persiana');
+		}
+
+		function botonAC() {
+
+			socket.emit('boton-ac');
+		}
+
+// EXÁMEN /////////////////////////////////////////////////////////
+
+		function botonNevera() {
+
+			socket.emit('boton-nevera');
+		}
+
+///////////////////////////////////////////////////////////////////
+
+		socket.on('actualizar-temperatura', function(data) {
+
+			var temp = document.getElementById('temperatura');
+			temp.innerHTML = data;
+		});
+
+		socket.on('actualizar-luminosidad', function(data) {
+
+			var lumi = document.getElementById('luminosidad');
+			lumi.innerHTML = data;
+		});
+
+// EXÁMEN //////////////////////////////////////////////////////////
+
+		socket.on('actualizar-alimentosnevera', function(data) {
+
+			var alimnevera = document.getElementById('alimentosnevera');
+			alimnevera.innerHTML = data;
+		});
+
+/////////////////////////////////////////////////////////////////////
+
+		socket.on('actualizar-persiana', function(data) {
+
+			var pers = document.getElementById('persiana');
+
+			if (data == false) {
+
+				pers.innerHTML = "<span style=\"color: red;\">CERRADA</span>";
+			}
+			else {
+
+				pers.innerHTML = "<span style=\"color: green;\">ABIERTA</span>";
+			}
+		});
+
+		socket.on('actualizar-ac', function(data) {
+
+			var ac = document.getElementById('ac');
+
+			if (data == false) {
+
+				ac.innerHTML = "<span style=\"color: red;\">OFF</span>";
+			}			
+			else {
+			
+				ac.innerHTML = "<span style=\"color: green;\">ON</span>";
+			}
+		});
+
+// EXÁMEN //////////////////////////////////////////////////////////
+
+		socket.on('actualizar-nevera', function(data) {
+
+			var ac = document.getElementById('nevera');
+
+			if (data == false) {
+
+				ac.innerHTML = "<span style=\"color: red;\">NORMAL</span>";
+			}			
+			else {
+			
+				ac.innerHTML = "<span style=\"color: green;\">BAJO CONSUMO</span>";
+			}
+		});
+
+		socket.emit('obtener-persiana');
+		socket.emit('obtener-ac');
+
+// EXÁMEN ////////////////////////////////////////////////////////////////
+
+		socket.emit('obtener-nevera');
+
+//////////////////////////////////////////////////////////////////////////
+
+		socket.on('actualizar-alerta-temperatura', function(data) {
+
+			var alertatemp = document.getElementById('alertatemp');
+			var alertatempd = document.getElementById('alertatempd');
+
+			alertatemp.innerHTML = data.aler;
+			alertatempd.innerHTML = data.d;
+		});
+
+		socket.on('actualizar-alerta-luminosidad', function(data) {
+
+			var alertalumi = document.getElementById('alertalumi');
+			var alertalumid = document.getElementById('alertalumid');
+
+			alertalumi.innerHTML = data.aler;
+			alertalumid.innerHTML = data.d;
+		});
+
+// EXÁMEN //////////////////////////////////////////////////////////
+
+		socket.on('actualizar-alerta-alimentosnevera', function(data) {
+
+			var alertaalimnevera = document.getElementById('alertaalimnevera');
+			var alertaalimneverad = document.getElementById('alertaalimneverad');
+
+			alertaalimnevera.innerHTML = data.aler;
+			alertaalimneverad.innerHTML = data.d;
+		});
+
+/////////////////////////////////////////////////////////////////////
+
+		socket.on('quitar-alerta-temperatura', function() {
+			
+			var alertatemp = document.getElementById('alertatemp');
+			var alertatempd = document.getElementById('alertatempd');
+
+			alertatemp.innerHTML = "";
+			alertatempd.innerHTML = "";			
+		});
+
+		socket.on('quitar-alerta-luminosidad', function() {
+			
+			var alertalumi = document.getElementById('alertalumi');
+			var alertalumid = document.getElementById('alertalumid');
+
+			alertalumi.innerHTML = "";
+			alertalumid.innerHTML = "";			
+		});	
+
+// EXÁMEN ///////////////////////////////////////////////////////////
+
+
+		socket.on('quitar-alerta-alimentosnevera', function() {
+			
+			var alertaalimnevera = document.getElementById('alertaalimnevera');
+			var alertaalimneverad = document.getElementById('alertaalimneverad');
+
+			alertaalimnevera.innerHTML = "";
+			alertaalimneverad.innerHTML = "";			
+		});
+
+///////////////////////////////////////////////////////////////////////
+	
+	</script>
+
+</html>

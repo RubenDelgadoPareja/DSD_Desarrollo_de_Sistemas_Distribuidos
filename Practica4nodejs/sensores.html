@@ -1,0 +1,154 @@
+<!-- José María Gómez García -->
+
+<html>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Sensores</title>
+	</head>
+
+	<body style="margin: 5%;">
+		
+		<h1>Sensores</h1>
+
+		<form action="javascript:void(0);" onsubmit="javascript:modificarTemperatura();">
+		
+			Temperatura: </br>
+
+			<input type="number" id="temperatura" style="height: 40px;margin-top: 10px;">
+
+			<input type="submit" value="Actualizar">
+		</form>
+
+		<form action="javascript:void(0);" onsubmit="javascript:modificarLuminosidad();">
+
+			Luminosidad: </br>
+
+			<input type="number" id="luminosidad" style="height: 40px;margin-top: 10px;">
+
+			<input type="submit" value="Actualizar">
+		</form>
+
+<!-- EXÁMEN ///////////////////////// -->
+
+		<form action="javascript:void(0);" onsubmit="javascript:modificarAlimentosNevera();">
+		
+			Nº de alimentos en nevera: </br>
+
+			<input type="number" id="alimentosnevera" style="height: 40px;margin-top: 10px;">
+
+			<input type="submit" value="Actualizar">
+		</form>
+
+<!-- /////////////////////////////////// -->
+
+		<h2>Actuadores</h2>
+
+		<p>Persiana: <span id="persiana"></span></p>
+
+		<p>A/C: <span id="ac"></span></p>
+
+<!-- EXÁMEN ///////////////////////////// -->
+
+		<p>Nevera: <span id="nevera"></span></p>
+
+<!-- /////////////////////////////////// -->
+
+	</body>
+
+	<script src="http://localhost:8080/socket.io/socket.io.js"></script>
+	<script type="text/javascript">
+
+		var serviceURL = 'localhost:8080';
+		var socket = io.connect(serviceURL);
+
+		function modificarTemperatura() {
+
+			var temperatura = document.getElementById("temperatura").value;
+
+			var date = new Date();
+
+			socket.emit('nueva-temperatura', {temp:temperatura, d:date});
+		}
+
+		function modificarLuminosidad() {
+
+			var luminosidad = document.getElementById("luminosidad").value;
+
+			var date = new Date();
+
+			socket.emit('nueva-luminosidad', {lumi:luminosidad, d:date});
+		}
+
+// EXÁMEN ///////////////////////////////////////////////////////////////////////////
+
+		function modificarAlimentosNevera() {
+
+			var alimentosnevera = document.getElementById("alimentosnevera").value;
+
+			var date = new Date();
+
+			socket.emit('nuevo-alimentosnevera', {alimnevera:alimentosnevera, d:date});
+		}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+		socket.on('actualizar-persiana', function(data) {
+
+			var pers = document.getElementById('persiana');
+
+			if (data == false) {
+
+				pers.innerHTML = "<span style=\"color: red;\">CERRADA</span>";
+			}
+			else {
+
+				pers.innerHTML = "<span style=\"color: green;\">ABIERTA</span>";
+			}
+		});
+
+		socket.on('actualizar-ac', function(data) {
+
+			var ac = document.getElementById('ac');
+
+			if (data == false) {
+
+				ac.innerHTML = "<span style=\"color: red;\">OFF</span>";
+			}			
+			else {
+			
+				ac.innerHTML = "<span style=\"color: green;\">ON</span>";
+			}
+		});
+
+
+// EXÁMEN //////////////////////////////////////////////////////////////////////////
+
+		socket.on('actualizar-nevera', function(data) {
+
+			var ac = document.getElementById('nevera');
+
+			if (data == false) {
+
+				ac.innerHTML = "<span style=\"color: red;\">NORMAL</span>";
+			}			
+			else {
+			
+				ac.innerHTML = "<span style=\"color: green;\">BAJO CONSUMO</span>";
+			}
+		});
+
+////////////////////////////////////////////////////////////////////////////////////
+
+		socket.emit('obtener-persiana');
+		socket.emit('obtener-ac');
+
+// EXÁMEN /////////////////////////////////////////////////////////////////////////
+
+		socket.emit('obtener-nevera');
+
+///////////////////////////////////////////////////////////////////////////////////
+
+	</script>
+
+</html>
